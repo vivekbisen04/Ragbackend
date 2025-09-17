@@ -10,14 +10,12 @@ import healthRoutes from './routes/health.js';
 import chatRoutes from './routes/chat.js';
 import searchRoutes from './routes/search.js';
 import articlesRoutes from './routes/articles.js';
-import newsManagementRoutes from './routes/newsManagement.js';
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
 import requestLogger from './middleware/requestLogger.js';
 
 // Import services
-import DailyNewsRefreshService from './services/dailyNewsRefreshService.js';
 
 // Load environment variables
 dotenv.config();
@@ -27,7 +25,6 @@ class RAGServer {
     this.app = express();
     this.port = process.env.PORT || 3001;
     this.env = process.env.NODE_ENV || 'development';
-    this.dailyRefreshService = new DailyNewsRefreshService();
 
     this.setupMiddleware();
     this.setupRoutes();
@@ -103,7 +100,6 @@ class RAGServer {
     this.app.use('/api/chat', chatRoutes);
     this.app.use('/api/search', searchRoutes);
     this.app.use('/api/articles', articlesRoutes);
-    this.app.use('/api/news-management', newsManagementRoutes);
 
     // API documentation endpoint
     this.app.get('/api', (req, res) => {
@@ -185,8 +181,6 @@ class RAGServer {
         console.log(`⏰ Started: ${new Date().toISOString()}`);
       });
 
-      // Initialize and start daily refresh service
-      await this.initializeDailyRefreshService();
 
       // Graceful shutdown handling
       this.setupGracefulShutdown();
@@ -217,26 +211,6 @@ class RAGServer {
     }
   }
 
-  async initializeDailyRefreshService() {
-    try {
-      console.log('📅 Initializing Daily News Refresh Service...');
-
-      await this.dailyRefreshService.initialize();
-
-      // Auto-start scheduler if enabled
-      const autoStart = process.env.AUTO_START_SCHEDULER === 'true';
-      if (autoStart) {
-        this.dailyRefreshService.startScheduler();
-        console.log('✅ Daily refresh scheduler started automatically');
-      } else {
-        console.log('ℹ️ Daily refresh scheduler not auto-started (use /api/news-management/scheduler/start to start manually)');
-      }
-
-    } catch (error) {
-      console.error('❌ Failed to initialize Daily News Refresh Service:', error.message);
-      console.log('⚠️ Server will continue without daily refresh functionality');
-    }
-  }
 
   setupGracefulShutdown() {
     const shutdown = async (signal) => {
