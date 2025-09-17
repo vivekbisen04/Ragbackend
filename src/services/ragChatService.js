@@ -76,6 +76,17 @@ class RAGChatService {
 
           response.metadata.rag_used = true;
           response.metadata.contexts_count = ragResults.contexts.length;
+
+          // Add detailed source attribution
+          response.metadata.sources = ragResults.contexts.map(context => ({
+            title: context.metadata?.title || 'Unknown Title',
+            source: context.metadata?.source || 'Unknown Source',
+            url: context.metadata?.url || null,
+            published_date: context.metadata?.published_date || null,
+            relevance_score: context.score || 0,
+            content_snippet: context.content?.substring(0, 200) + '...' || '',
+            category: context.metadata?.category || 'unknown'
+          }));
         } else {
           // No relevant context found, use simple response
           response = await this.generateFallbackResponse(userMessage, managedContext.messages);
