@@ -7,7 +7,14 @@ class QdrantService {
   constructor() {
     this.url = process.env.QDRANT_URL || 'http://localhost:6333';
     this.collectionName = process.env.QDRANT_COLLECTION || 'news_embeddings';
-    this.client = new QdrantClient({ url: this.url });
+
+    // Configure client with API key for cloud deployment
+    const clientConfig = { url: this.url };
+    if (process.env.QDRANT_API_KEY) {
+      clientConfig.apiKey = process.env.QDRANT_API_KEY;
+    }
+
+    this.client = new QdrantClient(clientConfig);
     this.vectorSize = 768; // Jina embeddings v2 base dimension
     this.distance = 'Cosine';
   }

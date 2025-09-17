@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "node src/server.js",
     "test": "jest",
     "lint": "eslint src/",
     "scrape:indian": "node src/scripts/scrapeIndianNews.js",
