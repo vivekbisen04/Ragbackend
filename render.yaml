@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: rag-chatbot-backend
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION
+        value: news_embeddings
+      - key: JINA_API_KEY
+        sync: false
+      - key: JINA_API_URL
+        value: https://api.jina.ai/v1/embeddings
+      - key: JINA_MODEL
+        value: jina-embeddings-v2-base-en
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: REDIS_TTL
+        value: 3600
+      - key: MAX_ARTICLES
+        value: 50
+      - key: SCRAPE_INTERVAL_HOURS
+        value: 24
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: SESSION_TTL_HOURS
+        value: 24
+      - key: MAX_CONVERSATION_HISTORY
+        value: 50
+      - key: NEWS_RETENTION_DAYS
+        value: 7
+      - key: DAILY_REFRESH_CRON
+        value: "0 6 * * *"
+      - key: AUTO_START_SCHEDULER
+        value: true
+
+databases:
+  - name: rag-chatbot-redis
+    plan: free
+    region: oregon
