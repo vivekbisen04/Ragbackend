@@ -33,6 +33,11 @@ class RAGServer {
   }
 
   setupMiddleware() {
+    // Trust proxy for production (fixes rate limiting behind reverse proxies)
+    if (this.env === 'production') {
+      this.app.set('trust proxy', 1);
+    }
+
     // Security middleware
     this.app.use(helmet({
       contentSecurityPolicy: this.env === 'production',
@@ -206,6 +211,10 @@ class RAGServer {
     console.log('🔍 Testing service connections...');
 
     try {
+      // Test PostgreSQL connection
+      const database = await import('./services/databaseService.js');
+      await database.default.initialize();
+
       // Test Redis connection
       const redis = await import('./services/redisService.js');
       await redis.default.testConnection();

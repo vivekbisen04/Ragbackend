@@ -4,6 +4,8 @@ import path from 'path';
 import { spawn } from 'child_process';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import RSSFeedScraper from '../services/rssFeedScraper.js';
+import redisService from '../services/redisService.js';
+import articleService from '../services/articleService.js';
 
 const router = express.Router();
 
@@ -52,21 +54,27 @@ router.post('/scrape-articles', adminAuth, asyncHandler(async (req, res) => {
 
     console.log(`✅ Successfully scraped ${articles.length} articles from RSS feeds`);
 
-    // Save to latest.json (preprocessor expects array format)
-    const rawDataPath = path.join(rawDir, 'latest.json');
-    await fs.writeFile(rawDataPath, JSON.stringify(articles, null, 2));
+    // Save to database (replace all existing articles)
+    await articleService.replaceAllArticles(articles);
 
-    // Also save stats separately if needed
-    const statsPath = path.join(rawDir, 'scrape-stats.json');
-    await fs.writeFile(statsPath, JSON.stringify({
+    // Also save to files (for backward compatibility with preprocessing)
+    const rawDataPath = path.join(rawDir, 'latest.json');
+    const statsData = JSON.stringify({
       total_articles: articles.length,
       scraped_at: new Date().toISOString(),
       rss_stats: scrapingResult.stats,
       sources: getSourceStats(articles),
       categories: getCategoryStats(articles)
-    }, null, 2));
+    });
 
-    console.log(`✅ Saved ${articles.length} articles to ${rawDataPath}`);
+    const statsPath = path.join(rawDir, 'scrape-stats.json');
+
+    await Promise.all([
+      fs.writeFile(rawDataPath, JSON.stringify(articles, null, 2)),
+      fs.writeFile(statsPath, statsData)
+    ]);
+
+    console.log(`✅ Saved ${articles.length} articles to database and ${rawDataPath}`);
 
     // Run preprocessing first
     console.log('🔄 Starting preprocessing...');
