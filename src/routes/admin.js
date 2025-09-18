@@ -57,6 +57,10 @@ router.post('/scrape-articles', adminAuth, asyncHandler(async (req, res) => {
 
     console.log(`✅ Saved ${sampleArticles.length} articles to ${rawDataPath}`);
 
+    // Run preprocessing first
+    console.log('🔄 Starting preprocessing...');
+    await runPreprocessing();
+
     // Run embedding pipeline
     console.log('🔄 Starting embedding generation...');
     const embeddingResult = await runEmbeddingPipeline();
@@ -224,6 +228,50 @@ async function scrapeArticlesFromSources() {
 
   console.log(`📰 Generated ${sampleArticles.length} sample articles`);
   return sampleArticles;
+}
+
+/**
+ * Run preprocessing pipeline as child process
+ */
+function runPreprocessing() {
+  return new Promise((resolve, reject) => {
+    console.log('🔄 Starting preprocessing pipeline...');
+
+    const preprocessProcess = spawn('node', ['src/scripts/preprocessData.js'], {
+      cwd: process.cwd(),
+      stdio: 'pipe'
+    });
+
+    let output = '';
+    let errorOutput = '';
+
+    preprocessProcess.stdout.on('data', (data) => {
+      const chunk = data.toString();
+      output += chunk;
+      console.log(chunk.trim());
+    });
+
+    preprocessProcess.stderr.on('data', (data) => {
+      const chunk = data.toString();
+      errorOutput += chunk;
+      console.error(chunk.trim());
+    });
+
+    preprocessProcess.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ Preprocessing completed successfully');
+        resolve({ success: true, output });
+      } else {
+        console.error('❌ Preprocessing failed with code:', code);
+        reject(new Error(`Preprocessing failed with code ${code}. Error: ${errorOutput}`));
+      }
+    });
+
+    preprocessProcess.on('error', (error) => {
+      console.error('❌ Error running preprocessing:', error);
+      reject(error);
+    });
+  });
 }
 
 /**
