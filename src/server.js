@@ -38,11 +38,13 @@ class RAGServer {
       crossOriginEmbedderPolicy: false
     }));
 
-    // CORS configuration
+    // CORS configuration - allow both localhost and production frontend
     const corsOptions = {
-      origin: this.env === 'production'
-        ? process.env.FRONTEND_URL || 'http://localhost:3000'
-        : ['http://localhost:3000', 'http://127.0.0.1:3000','https://ragfrontend-nu.vercel.app/'],
+      origin: [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'https://ragfrontend-nu.vercel.app'
+      ],
       credentials: true,
       optionsSuccessStatus: 200,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
