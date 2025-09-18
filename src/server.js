@@ -10,6 +10,7 @@ import healthRoutes from './routes/health.js';
 import chatRoutes from './routes/chat.js';
 import searchRoutes from './routes/search.js';
 import articlesRoutes from './routes/articles.js';
+import adminRoutes from './routes/admin.js';
 
 // Import middleware
 import errorHandler from './middleware/errorHandler.js';
@@ -102,6 +103,7 @@ class RAGServer {
     this.app.use('/api/chat', chatRoutes);
     this.app.use('/api/search', searchRoutes);
     this.app.use('/api/articles', articlesRoutes);
+    this.app.use('/api/admin', adminRoutes);
 
     // API documentation endpoint
     this.app.get('/api', (req, res) => {
@@ -127,6 +129,11 @@ class RAGServer {
             'GET /api/articles': 'Get all scraped articles',
             'GET /api/articles/stats': 'Get article statistics',
             'GET /api/articles/search': 'Search articles by keyword'
+          },
+          admin: {
+            'POST /api/admin/scrape-articles': 'Scrape articles from sources and generate embeddings',
+            'GET /api/admin/scrape-status': 'Check article scraping status',
+            'POST /api/admin/regenerate-embeddings': 'Regenerate embeddings from existing articles'
           }
         },
         documentation: '/api/docs'
