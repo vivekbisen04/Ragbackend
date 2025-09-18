@@ -1,8 +1,39 @@
-# RAG Chatbot Backend
+# RAG News Chatbot Backend
 
-A sophisticated RAG (Retrieval-Augmented Generation) chatbot backend that provides intelligent news-based conversations using advanced vector search and AI.
+RAG-powered news chatbot backend with real-time RSS feeds, vector embeddings, and conversational AI.
 
-## 🚀 Features
+##  Live Deployment
+
+- **Backend API:** https://ragbackend-io08.onrender.com
+- **Frontend Demo:** https://ragfrontend-nu.vercel.app
+- **GitHub Frontend:** https://github.com/vivekbisen04/Ragfrontend
+- **GitHub Backend:** https://github.com/vivekbisen04/Ragbackend
+
+##  For Reviewers
+
+### Quick Test Endpoints
+```bash
+# Populate with real RSS articles (required first)
+curl -X POST "https://ragbackend-io08.onrender.com/api/admin/scrape-articles" \
+  -H "X-Admin-Key: secure-admin-key-2025-rag-chatbot"
+
+# Test chat functionality
+curl -X POST "https://ragbackend-io08.onrender.com/api/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What are the latest AI developments?", "sessionId": "test-session"}'
+
+# Get available articles
+curl "https://ragbackend-io08.onrender.com/api/articles"
+```
+
+### Key Features Demonstrated
+- **RAG Pipeline:** Vector similarity search with Qdrant Cloud
+- **Real News:** 8 RSS sources (BBC, Reuters, TechCrunch, CNN)
+- **AI Integration:** Google Gemini with 768-dim Jina embeddings
+- **Session Management:** Redis-based conversation history
+- **Production Ready:** Deployed on Render + Qdrant Cloud + Upstash Redis
+
+##  Features
 
 - **RAG Pipeline**: Advanced retrieval-augmented generation with Qdrant vector database
 - **AI Integration**: Google Gemini AI for natural conversations
@@ -13,7 +44,7 @@ A sophisticated RAG (Retrieval-Augmented Generation) chatbot backend that provid
 - **Rate Limiting**: Express-based rate limiting for API protection
 - **Health Monitoring**: Comprehensive service health checks
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Runtime**: Node.js 18+ with ES modules
 - **Framework**: Express.js with CORS and Helmet security
@@ -23,7 +54,7 @@ A sophisticated RAG (Retrieval-Augmented Generation) chatbot backend that provid
 - **Scheduling**: Node-cron for automated tasks
 - **Monitoring**: Morgan logging, custom health checks
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Node.js 18.0.0 or higher
 - Docker and Docker Compose
@@ -31,50 +62,8 @@ A sophisticated RAG (Retrieval-Augmented Generation) chatbot backend that provid
 - Redis server
 - API keys for Google Gemini and Jina AI
 
-## 🔧 Installation
 
-1. **Clone and setup**:
-   ```bash
-   cd backend
-   npm install
-   ```
-
-2. **Environment Configuration**:
-   Copy `.env.example` to `.env` and configure:
-   ```env
-   # Server
-   PORT=3001
-   NODE_ENV=development
-
-   # Redis
-   REDIS_URL=redis://localhost:6380
-   REDIS_TTL=3600
-
-   # AI Services
-   JINA_API_KEY=your_jina_api_key
-   GEMINI_API_KEY=your_gemini_api_key
-
-   # Qdrant
-   QDRANT_URL=http://localhost:6333
-   QDRANT_COLLECTION=news_embeddings
-
-   # Daily Refresh
-   NEWS_RETENTION_DAYS=7
-   DAILY_REFRESH_CRON=0 6 * * *
-   AUTO_START_SCHEDULER=true
-   ```
-
-3. **Start Services**:
-   ```bash
-   # Start Qdrant and Redis
-   docker run -p 6333:6333 qdrant/qdrant
-   docker run -p 6380:6379 redis:alpine
-
-   # Start backend
-   npm run dev
-   ```
-
-## 📡 API Endpoints
+##  API Endpoints
 
 ### Chat API (`/api/chat`)
 - `POST /chat` - Send message and get AI response
@@ -97,40 +86,16 @@ A sophisticated RAG (Retrieval-Augmented Generation) chatbot backend that provid
 ### Health Check (`/api/health`)
 - `GET /health` - Service health status
 
-## 🎯 Usage Examples
+## Architecture
 
-### Chat with AI
-```bash
-curl -X POST http://localhost:3001/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "What are the latest developments in AI?",
-    "sessionId": "user123"
-  }'
-```
+- **Frontend:** React.js + SCSS + Axios → Vercel
+- **Backend:** Node.js + Express + ES modules → Render
+- **Vector DB:** Qdrant Cloud (768-dim embeddings)
+- **Cache:** Upstash Redis (sessions + responses)
+- **AI:** Google Gemini + Jina AI embeddings
+- **News:** 8 RSS feeds with real-time scraping
 
-### Search Articles
-```bash
-curl -X POST http://localhost:3001/api/search \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "artificial intelligence",
-    "topK": 5,
-    "filters": {
-      "sources": ["BBC News", "Reuters"],
-      "dateFrom": "2025-09-10"
-    }
-  }'
-```
-
-### Manual News Refresh
-```bash
-curl -X POST http://localhost:3001/api/news-management/refresh \
-  -H "Content-Type: application/json" \
-  -d '{"force": true}'
-```
-
-## 🔄 Daily News Refresh
+##  Daily News Refresh
 
 The system automatically:
 - Removes articles older than 7 days (configurable)
@@ -151,7 +116,7 @@ npm run refresh:news refresh
 npm run refresh:news cleanup
 ```
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 backend/
@@ -179,47 +144,7 @@ backend/
 └── Dockerfile              # Container configuration
 ```
 
-## 🐳 Docker Deployment
-
-1. **Build Image**:
-   ```bash
-   docker build -t rag-chatbot-backend .
-   ```
-
-2. **Run Container**:
-   ```bash
-   docker run -p 3001:3001 \
-     --env-file .env \
-     rag-chatbot-backend
-   ```
-
-3. **With Docker Compose** (create docker-compose.yml):
-   ```yaml
-   version: '3.8'
-   services:
-     backend:
-       build: .
-       ports:
-         - "3001:3001"
-       environment:
-         - REDIS_URL=redis://redis:6379
-         - QDRANT_URL=http://qdrant:6333
-       depends_on:
-         - redis
-         - qdrant
-
-     redis:
-       image: redis:alpine
-       ports:
-         - "6380:6379"
-
-     qdrant:
-       image: qdrant/qdrant
-       ports:
-         - "6333:6333"
-   ```
-
-## 📊 Monitoring
+##  Monitoring
 
 ### Health Checks
 ```bash
@@ -238,7 +163,7 @@ curl http://localhost:3001/api/search/stats
 - Daily refresh: Automated logging with statistics
 - Error tracking: Comprehensive error handling
 
-## 🔧 Development
+##  Development
 
 ### Scripts
 - `npm run dev` - Development server with nodemon
@@ -249,76 +174,3 @@ curl http://localhost:3001/api/search/stats
 ### Environment Modes
 - `development` - Full logging, auto-restart
 - `production` - Optimized performance, minimal logging
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Service Connection Errors**:
-   ```bash
-   # Check services are running
-   docker ps
-
-   # Restart services
-   docker restart <container_name>
-   ```
-
-2. **Cache Issues**:
-   ```bash
-   # Clear Redis cache
-   curl -X POST http://localhost:3001/api/news-management/cleanup
-   ```
-
-3. **Vector Database Issues**:
-   ```bash
-   # Check Qdrant health
-   curl http://localhost:6333/health
-
-   # Recreate collection
-   npm run refresh:news refresh
-   ```
-
-4. **API Quota Exceeded**:
-   - Check Gemini API quotas
-   - Update API keys in `.env`
-   - Monitor usage in logs
-
-### Debug Mode
-```bash
-NODE_ENV=development npm run dev
-```
-
-## 📈 Performance
-
-- **Search**: ~200ms average response time
-- **Chat**: ~1-2s depending on context size
-- **Caching**: 5-minute TTL for search results
-- **Database**: Optimized for 50k+ articles
-- **Concurrent Users**: Rate limited to 100 req/15min
-
-## 🔒 Security
-
-- Helmet.js for security headers
-- Rate limiting per IP
-- Input validation and sanitization
-- Environment variable protection
-- No sensitive data logging
-
-## 🔄 Updates & Maintenance
-
-- Daily automated news refresh at 6:00 AM
-- Weekly vector database optimization
-- Monthly dependency updates
-- Quarterly performance reviews
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
-## 🆘 Support
-
-For issues and questions:
-1. Check troubleshooting section
-2. Review logs for error details
-3. Verify service configurations
-4. Test with manual endpoints
