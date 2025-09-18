@@ -207,9 +207,59 @@ class RAGServer {
       await qdrantService.healthCheck();
 
       console.log('✅ All service connections verified');
+
+      // Check and generate embeddings if needed
+      await this.ensureEmbeddings(qdrantService);
+
     } catch (error) {
       console.error('❌ Service connection failed:', error.message);
       throw error;
+    }
+  }
+
+  async ensureEmbeddings(qdrantService) {
+    try {
+      console.log('🔍 Checking if embeddings exist...');
+
+      // Get collection stats to check if embeddings exist
+      const stats = await qdrantService.getCollectionStats();
+      const pointsCount = stats.points_count || 0;
+
+      console.log(`📊 Current collection has ${pointsCount} points`);
+
+      if (pointsCount === 0) {
+        console.log('⚠️ No embeddings found. Generating embeddings...');
+
+        // Import and run the embedding pipeline
+        const { spawn } = await import('child_process');
+
+        return new Promise((resolve, reject) => {
+          const embeddingProcess = spawn('node', ['run-embeddings.js'], {
+            cwd: process.cwd(),
+            stdio: 'inherit'
+          });
+
+          embeddingProcess.on('close', (code) => {
+            if (code === 0) {
+              console.log('✅ Embeddings generated successfully');
+              resolve();
+            } else {
+              console.error('❌ Failed to generate embeddings');
+              reject(new Error(`Embedding process failed with code ${code}`));
+            }
+          });
+
+          embeddingProcess.on('error', (error) => {
+            console.error('❌ Error running embedding process:', error);
+            reject(error);
+          });
+        });
+      } else {
+        console.log('✅ Embeddings already exist, skipping generation');
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not check/generate embeddings:', error.message);
+      console.log('📝 Server will continue without embeddings (RAG will use general knowledge)');
     }
   }
 
