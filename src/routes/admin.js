@@ -43,16 +43,17 @@ router.post('/scrape-articles', adminAuth, asyncHandler(async (req, res) => {
     // Sample RSS feeds and news sources
     const sampleArticles = await scrapeArticlesFromSources();
 
-    // Save to latest.json
+    // Save to latest.json (preprocessor expects array format)
     const rawDataPath = path.join(rawDir, 'latest.json');
-    await fs.writeFile(rawDataPath, JSON.stringify({
-      articles: sampleArticles,
-      stats: {
-        total_articles: sampleArticles.length,
-        scraped_at: new Date().toISOString(),
-        sources: getSourceStats(sampleArticles),
-        categories: getCategoryStats(sampleArticles)
-      }
+    await fs.writeFile(rawDataPath, JSON.stringify(sampleArticles, null, 2));
+
+    // Also save stats separately if needed
+    const statsPath = path.join(rawDir, 'scrape-stats.json');
+    await fs.writeFile(statsPath, JSON.stringify({
+      total_articles: sampleArticles.length,
+      scraped_at: new Date().toISOString(),
+      sources: getSourceStats(sampleArticles),
+      categories: getCategoryStats(sampleArticles)
     }, null, 2));
 
     console.log(`✅ Saved ${sampleArticles.length} articles to ${rawDataPath}`);

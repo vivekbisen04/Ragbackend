@@ -32,6 +32,17 @@ router.get('/', asyncHandler(async (req, res) => {
         console.error('Unexpected raw data structure');
         articles = [];
       }
+
+      // Try to load stats from separate file if not found
+      if (Object.keys(stats).length === 0) {
+        try {
+          const statsPath = path.join(process.cwd(), 'data', 'raw', 'scrape-stats.json');
+          const statsData = await fs.readFile(statsPath, 'utf8');
+          stats = JSON.parse(statsData);
+        } catch (statsError) {
+          // Stats file doesn't exist, keep empty stats
+        }
+      }
     } catch (rawError) {
       console.error('Error reading raw articles:', rawError.message);
       articles = [];
