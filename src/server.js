@@ -131,8 +131,10 @@ class RAGServer {
             'GET /api/articles/search': 'Search articles by keyword'
           },
           admin: {
-            'POST /api/admin/scrape-articles': 'Scrape articles from sources and generate embeddings',
+            'POST /api/admin/scrape-articles': 'Scrape real articles from RSS feeds and generate embeddings',
             'GET /api/admin/scrape-status': 'Check article scraping status',
+            'GET /api/admin/rss-feeds': 'Get available RSS feed sources',
+            'POST /api/admin/test-rss': 'Test a specific RSS feed URL',
             'POST /api/admin/regenerate-embeddings': 'Regenerate embeddings from existing articles'
           }
         },
